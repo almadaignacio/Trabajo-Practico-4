@@ -1,24 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class ObjectPool : MonoBehaviour
 {
+
     [SerializeField] private GameObject objectPrefab;
-    [SerializeField] private List<GameObject> objectList;
+    public List<GameObject> objectList;
     [SerializeField] private int objectSize;
     public static ObjectPool Instance { get; private set; }
 
     private void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        Instance = this;
     }
 
     private void Start()
@@ -37,12 +32,13 @@ public class ObjectPool : MonoBehaviour
         }
     }
 
-    public GameObject GetPooledObject(string bulletType)
+    public GameObject GetPooledObject()
     {
         for (int i = 0; i < objectList.Count; i++)
         {
-            if (!objectList[i].activeInHierarchy)
+            if (!objectList[i].activeSelf)
             {
+                objectList[i].SetActive(true);
                 return objectList[i];
             }
         }

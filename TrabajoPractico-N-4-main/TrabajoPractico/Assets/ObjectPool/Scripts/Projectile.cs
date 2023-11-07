@@ -6,14 +6,16 @@ public class Projectile : MonoBehaviour {
 
     public TurretAI.TurretType type = TurretAI.TurretType.Single;
     public Transform target;
-    public bool lockOn;
-    public float speed = 1;
-    public float turnSpeed = 1;
-    public bool catapult;
+    [SerializeField] private bool lockOn;
+    [SerializeField] private float speed = 1;
+    [SerializeField] private float turnSpeed = 1;
+    [SerializeField] private bool catapult;
 
-    public float knockBack = 0.1f;
-    public float boomTimer = 1;
-    public ParticleSystem explosion;
+    [SerializeField] private float knockBack = 0.1f;
+    [SerializeField] private float boomTimer = 1;
+    [SerializeField] private ParticleSystem explosion;
+    [SerializeField] private int poolAmmount;
+
 
     private void Start()
     {
@@ -27,6 +29,7 @@ public class Projectile : MonoBehaviour {
             Vector3 dir = target.position - transform.position;
             transform.rotation = Quaternion.LookRotation(dir);
         }
+
     }
 
     private void Update()
@@ -48,28 +51,30 @@ public class Projectile : MonoBehaviour {
             Explosion();
         }
 
-        if (type == TurretAI.TurretType.Catapult)
+        switch(type)
         {
-            if (lockOn)
-            {
-                Vector3 Vo = CalculateCatapult(target.transform.position, transform.position, 1);
+            case TurretAI.TurretType.Catapult:
+                if (lockOn)
+                {
+                    Vector3 Vo = CalculateCatapult(target.transform.position, transform.position, 1);
+                    transform.GetComponent<Rigidbody>().velocity = Vo;
+                    lockOn = false;
+                }
+                break;
+            case TurretAI.TurretType.Dual:
+                Vector3 dir = target.position - transform.position;
+                Vector3 newDirection = Vector3.RotateTowards(transform.forward, dir, Time.deltaTime * turnSpeed, 0.0f);
+                Debug.DrawRay(transform.position, newDirection, Color.red);
 
-                transform.GetComponent<Rigidbody>().velocity = Vo;
-                lockOn = false;
-            }
-        }else if(type == TurretAI.TurretType.Dual)
-        {
-            Vector3 dir = target.position - transform.position;
-            Vector3 newDirection = Vector3.RotateTowards(transform.forward, dir, Time.deltaTime * turnSpeed, 0.0f);
-            Debug.DrawRay(transform.position, newDirection, Color.red);
-
-            transform.Translate(Vector3.forward * Time.deltaTime * speed);
-            transform.rotation = Quaternion.LookRotation(newDirection);
-
-        }else if (type == TurretAI.TurretType.Single)
-        {
-            float singleSpeed = speed * Time.deltaTime;
-            transform.Translate(transform.forward * singleSpeed * 2, Space.World);
+                transform.Translate(Vector3.forward * Time.deltaTime * speed);
+                transform.rotation = Quaternion.LookRotation(newDirection);
+                break;
+            case TurretAI.TurretType.Single:
+                float singleSpeed = speed * Time.deltaTime;
+                transform.Translate(transform.forward * singleSpeed * 2, Space.World);
+                break;
+            default:
+                break;
         }
     }
 
@@ -98,20 +103,19 @@ public class Projectile : MonoBehaviour {
         {
             Vector3 dir = other.transform.position - transform.position;
             Vector3 knockBackPos = other.transform.position + (dir.normalized * knockBack);
-            knockBackPos.y = 1;
+            knockBackPos.y = 0.5f;
             other.transform.position = knockBackPos;
             Explosion();
         }
     }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-            gameObject.SetActive(false);
-    }
-
     public void Explosion()
     {
         Instantiate(explosion, transform.position, transform.rotation);
-        gameObject.SetActive(false);
+        this.gameObject.SetActive(false);
+        lockOn = true;
     }
 }
+
+
+

@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class TurretAI : MonoBehaviour {
 
@@ -11,7 +13,7 @@ public class TurretAI : MonoBehaviour {
         Catapult = 3,
     }
     
-    public GameObject currentTarget;
+    private GameObject currentTarget;
     public Transform turreyHead;
 
     public float attackDist = 10.0f;
@@ -20,8 +22,8 @@ public class TurretAI : MonoBehaviour {
     private float timer;
     public float loockSpeed;
 
-    public Vector3 randomRot;
-    public Animator animator;
+    private Vector3 randomRot;
+    private Animator animator;
 
     [Header("[Turret Type]")]
     public TurretType turretType = TurretType.Single;
@@ -59,7 +61,7 @@ public class TurretAI : MonoBehaviour {
         }
         else
         {
-            IdleRitate();
+            IdleRotate();
         }
 
         timer += Time.deltaTime;
@@ -72,11 +74,11 @@ public class TurretAI : MonoBehaviour {
                 if (animator != null)
                 {
                     animator.SetTrigger("Fire");
-                    ShootTrigger();
+                    Shoot(turretType);
                 }
                 else
                 {
-                    ShootTrigger();
+                    Shoot(turretType);
                 }
             }
         }
@@ -115,11 +117,6 @@ public class TurretAI : MonoBehaviour {
         }
     }
 
-    private void ShootTrigger()
-    {
-        Shoot(currentTarget);
-    }
-    
     Vector3 CalculateVelocity(Vector3 target, Vector3 origen, float time)
     {
         Vector3 distance = target - origen;
@@ -139,16 +136,10 @@ public class TurretAI : MonoBehaviour {
         return result;
     }
 
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, attackDist);
-    }
-
-    public void IdleRitate()
+    public void IdleRotate()
     {
         bool refreshRandom = false;
-        
+
         if (turreyHead.rotation != Quaternion.Euler(randomRot))
         {
             turreyHead.rotation = Quaternion.RotateTowards(turreyHead.transform.rotation, Quaternion.Euler(randomRot), loockSpeed * Time.deltaTime * 0.2f);
@@ -159,7 +150,6 @@ public class TurretAI : MonoBehaviour {
 
             if (refreshRandom)
             {
-
                 int randomAngle = Random.Range(0, 359);
                 randomRot = new Vector3(0, randomAngle, 0);
                 refreshRandom = false;
@@ -167,85 +157,50 @@ public class TurretAI : MonoBehaviour {
         }
     }
 
-    public void Shoot(GameObject go)
+    private void OnDrawGizmosSelected()
     {
-        if (turretType == TurretType.Catapult)
-        {
-            lockOnPos = go.transform;
-            //Aplicar POOL OBJECT
-            //Instantiate(muzzleEff, muzzleMain.transform.position, muzzleMain.rotation);
-            //GameObject missleGo = Instantiate(bullet, muzzleMain.transform.position, muzzleMain.rotation);
-            //Projectile projectile = missleGo.GetComponent<Projectile>();
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, attackDist);
+    }
 
-            GameObject prefab = ObjectPool.Instance.GetPooledObject(turretType.ToString());
-            if (prefab != null)
-            {
-                prefab.transform.position = muzzleMain.position;
-                prefab.transform.rotation = muzzleMain.rotation;
-                //Projectile projectile = prefab.GetComponent<Projectile>();
-                //projectile.target = currentTarget.transform;
-                prefab.SetActive(true);
-            }
-            //projectile.target = lockOnPos;
-        }
-        else if(turretType == TurretType.Dual)
+    public void Shoot(TurretType turretType)
+    {
+        switch(turretType)
         {
-            if (shootLeft)
-            {
-                //Aplicar POOL OBJECT
-                //Instantiate(muzzleEff, muzzleMain.transform.position, muzzleMain.rotation);
-                //GameObject missleGo = Instantiate(bullet, muzzleMain.transform.position, muzzleMain.rotation);
-                //Projectile projectile = missleGo.GetComponent<Projectile>();
-                //projectile.target = transform.GetComponent<TurretAI>().currentTarget.transform;
-                
-                GameObject prefab = ObjectPool.Instance.GetPooledObject(turretType.ToString());
-                if (prefab != null)
+            case TurretType.Catapult:
+                ShootBullet(muzzleMain);
+                break;
+            case TurretType.Dual:
+                if(shootLeft)
                 {
-                    prefab.transform.position = muzzleMain.position;
-                    prefab.transform.rotation = muzzleMain.rotation;
-                    Projectile projectile = prefab.GetComponent<Projectile>();
-                    projectile.target = currentTarget.transform;
-                    prefab.SetActive(true);
+                    ShootBullet(muzzleMain);
                 }
-            }
-            else
-            {
-                //Aplicar POOL OBJECT
-                //Instantiate(muzzleEff, muzzleSub.transform.position, muzzleSub.rotation);
-                //GameObject missleGo = Instantiate(bullet, muzzleSub.transform.position, muzzleSub.rotation);
-                //Projectile projectile = missleGo.GetComponent<Projectile>();
-                //projectile.target = transform.GetComponent<TurretAI>().currentTarget.transform;
-
-                GameObject prefab = ObjectPool.Instance.GetPooledObject(turretType.ToString());
-                if (prefab != null)
+                else
                 {
-                    prefab.transform.position = muzzleMain.position;
-                    prefab.transform.rotation = muzzleMain.rotation;
-                    Projectile projectile = prefab.GetComponent<Projectile>();
-                    projectile.target = currentTarget.transform;
-                    prefab.SetActive(true);
+                    ShootBullet(muzzleSub);
                 }
-            }
-
-            shootLeft = !shootLeft;
+                shootLeft = !shootLeft;
+                break;
+            case TurretType.Single:
+                ShootBullet(muzzleMain);
+                break;
+            default:
+                break;
         }
-        else
-        {
-            //Aplicar POOL OBJECT
-            //Instantiate(muzzleEff, muzzleMain.transform.position, muzzleMain.rotation);
-            //GameObject missleGo = Instantiate(bullet, muzzleMain.transform.position, muzzleMain.rotation);
-            //Projectile projectile = missleGo.GetComponent<Projectile>();
-            //projectile.target = currentTarget.transform;
+    }
 
-            GameObject prefab = ObjectPool.Instance.GetPooledObject(turretType.ToString());
-            if (prefab != null)
-            {
-                prefab.transform.position = muzzleMain.position;
-                prefab.transform.rotation = muzzleMain.rotation;
-                Projectile projectile = prefab.GetComponent<Projectile>();
-                projectile.target = currentTarget.transform;
-                prefab.SetActive(true);
-            }
+    public void ShootBullet(Transform spawnBullet)
+    {
+        Instantiate(muzzleEff, spawnBullet.transform.position, spawnBullet.transform.rotation);
+
+        GameObject prefab = ObjectPool.Instance.GetPooledObject();
+        if (prefab != null)
+        {
+            Projectile projectile = prefab.GetComponent<Projectile>();
+            projectile.target = currentTarget.transform;
+            prefab.SetActive(true);
+            prefab.transform.position = spawnBullet.position;
+            prefab.transform.rotation = spawnBullet.rotation;
         }
     }
 }
