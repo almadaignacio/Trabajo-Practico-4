@@ -14,24 +14,24 @@ public class TurretAI : MonoBehaviour {
     }
     
     private GameObject currentTarget;
-    public Transform turreyHead;
+    [SerializeField] private Transform turreyHead;
 
-    public float attackDist = 10.0f;
-    public float attackDamage;
-    public float shootCoolDown;
+    [SerializeField] private float attackDist = 10.0f;
+    [SerializeField] private float attackDamage;
+    [SerializeField] private float shootCoolDown;
     private float timer;
-    public float loockSpeed;
+    [SerializeField] private float loockSpeed;
 
     private Vector3 randomRot;
     private Animator animator;
 
     [Header("[Turret Type]")]
-    public TurretType turretType = TurretType.Single;
-    
-    public Transform muzzleMain;
-    public Transform muzzleSub;
-    public GameObject muzzleEff;
-    public GameObject bullet;
+    [SerializeField] private TurretType turretType = TurretType.Single;
+
+    [SerializeField] private Transform muzzleMain;
+    [SerializeField] private Transform muzzleSub;
+    [SerializeField] private GameObject muzzleEff;
+    [SerializeField] private GameObject bullet;
     private bool shootLeft = true;
 
     private Transform lockOnPos;
