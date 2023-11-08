@@ -1,5 +1,7 @@
 # Trabajo-Practico-4
 
+Actividades:
+
 Para la Escena "PoolObject":
 
 
@@ -22,5 +24,6 @@ Crear tres objetos 3D: Arbusto, Roca y Arbol.
 Crear una clase padre llamada "Factory" para la creación de objetos.
 Crear tres clases hijas que heredan de la clase "Factory" .Uno para gestionar la creación de Arbustos, otro para gestionar la creación de rocas y para gestionar la creación de árboles.
 Deben implementar un botón en la pantalla que llame a las fábricas para crear los objetos correspondientes.
+
 
 Alumno: Almada Juan Ignacio
