@@ -23,13 +23,6 @@ public class Projectile : MonoBehaviour {
         {
             lockOn = true;
         }
-
-        if (type == TurretAI.TurretType.Single)
-        {
-            Vector3 dir = target.position - transform.position;
-            transform.rotation = Quaternion.LookRotation(dir);
-        }
-
     }
 
     private void Update()
@@ -37,16 +30,15 @@ public class Projectile : MonoBehaviour {
         if (target == null)
         {
             Explosion();
-            return;
+        }
+
+        if (type == TurretAI.TurretType.Single)
+        {
+            Vector3 dir = target.position - transform.position;
+            transform.rotation = Quaternion.LookRotation(dir);
         }
 
         if (transform.position.y < -0.2F)
-        {
-            Explosion();
-        }
-
-        boomTimer -= Time.deltaTime;
-        if (boomTimer < 0)
         {
             Explosion();
         }
@@ -103,7 +95,7 @@ public class Projectile : MonoBehaviour {
         {
             Vector3 dir = other.transform.position - transform.position;
             Vector3 knockBackPos = other.transform.position + (dir.normalized * knockBack);
-            knockBackPos.y = 0.5f;
+            knockBackPos.y = 0.2f;
             other.transform.position = knockBackPos;
             Explosion();
         }
